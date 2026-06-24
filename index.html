@@ -1840,10 +1840,17 @@
         wrap.scrollTo({ left: wrap.scrollLeft + delta, behavior: 'smooth' });
       } else {
         const pv = Math.floor(perView());
-        if (!cachedCardW) cachedCardW = cards[0].offsetWidth + 16;
-        track.style.transform = `translateX(-${current * pv * cachedCardW}px)`;
+        if (cachedCardW) {
+          track.style.transform = `translateX(-${current * pv * cachedCardW}px)`;
+        }
       }
       setActiveDot(current);
+    }
+
+    function cacheCardWidth() {
+      if (!cachedCardW && cards.length > 0) {
+        cachedCardW = cards[0].offsetWidth + 16;
+      }
     }
 
     /* No auto-advance — the user is fully in control (finger-scroll / arrows / dots). */
@@ -1851,9 +1858,9 @@
 
     /* Defer init off the critical render path. NO goTo() on load — that would scroll
        the carousel into view ("fly to section"). Just set the first dot. */
-    requestAnimationFrame(() => { buildDots(); setActiveDot(0); });
+    requestAnimationFrame(() => { buildDots(); setActiveDot(0); cacheCardWidth(); });
     window.addEventListener('resize', () => {
-      cachedVW = window.innerWidth; cachedCardW = 0; buildDots();
+      cachedVW = window.innerWidth; cachedCardW = 0; buildDots(); cacheCardWidth();
       if (isNative()) setActiveDot(current); else goTo(0);
     });
 
